@@ -1,51 +1,63 @@
-# 1차 공정 기준 조건. 모든 값은 {value, unit, source}.
-# source: assumed(가정·문헌 대표값, 미검증) / measured(실측). 실측 확보 시 value와 source를 바꾼다.
+# 1차 공정 기준 조건. 모든 값은 {value, unit, source[, ref]}.
+# source: literature(문헌값, ref 필수) / assumed(가정, 근거 없음) / measured(실측).
+# 실측 확보 시 value와 source를 바꾼다.
+# 주의: 일부 ref는 초록·그림 판독 기준 — 인용 전 원문 확인 필요.
 
-feed:   # 미강(쌀겨)
+feed:   # 미강(쌀겨, 전지)
   bran_flow:        {value: 1000,  unit: kg/h,           source: assumed}
-  moisture:         {value: 0.11,  unit: wt (wet),       source: assumed}
-  total_P:          {value: 0.020, unit: wt (dry),       source: assumed}   # 미강 1.5~2.5 %
-  organic_P_frac:   {value: 0.85,  unit: of total P,     source: assumed}   # 피트산 P 비율
-  protein:          {value: 0.14,  unit: wt (dry),       source: assumed}
-  lipid:            {value: 0.18,  unit: wt (dry),       source: assumed}   # 탈지미강이면 ~0.02
-  carbohydrate:     {value: 0.45,  unit: wt (dry),       source: assumed}
-  # Ash(인 외 무기질) = 나머지
+  moisture:         {value: 0.10,  unit: wt (wet),       source: literature, ref: "Feedipedia node/750 (DM 87-93%)"}
+  total_P:          {value: 0.018, unit: wt (dry),       source: literature, ref: "USDA FDC 169713 1.79%; Feedipedia 1.70±0.31%"}
+  organic_P_frac:   {value: 0.90,  unit: of total P,     source: literature, ref: "Casas & Stein 2015 J Anim Sci 93:3441 (0.905)"}
+  protein:          {value: 0.14,  unit: wt (dry),       source: literature, ref: "USDA 14.2%; Feedipedia 14.8±1.5%"}
+  lipid:            {value: 0.18,  unit: wt (dry),       source: literature, ref: "Feedipedia 17.2±2.6%; USDA 22.2%. 탈지미강 1-4%"}
+  carbohydrate:     {value: 0.50,  unit: wt (dry),       source: literature, ref: "USDA 52.9% (차감법); Feedipedia 전분 28.8 + NDF 25.2"}
+  # Ash(인 외 무기질) = 나머지 (~11.7%, 문헌 9.4-10.6%)
 
 pretreatment:
   water_ratio:      {value: 8,     unit: kg water/kg bran, source: assumed}
 
-enzyme:   # 피타아제 가수분해. X = 1 - exp(-k t), k = k_ref·(dose/dose_ref)·f_T·f_pH
-  T:                {value: 50,    unit: degC,           source: assumed}
-  pH:               {value: 5.0,   unit: "-",            source: assumed}   # 1차: pH는 입력값(산·염기 투입 미계산)
+enzyme:   # 피타아제(A. niger 3-phytase). 피트산 → IP1 + 5 Pi
+  # 전환율 X = min(동역학, 효소용량).
+  #   동역학: X = 1 - exp(-k·t_eff), k = k_ref·(dose/dose_ref)·f_T·f_pH
+  #   용량:   방출 Pi ≤ dose·activity_ratio·f_T·f_pH·t_eff (1 U = 1 µmol Pi/min)
+  #   실활:   T > T_inact 이면 kd = kd_slope·(T - T_inact), t_eff = (1 - e^(-kd·t))/kd
+  T:                {value: 50,    unit: degC,           source: literature, ref: "Liang 2009 Food Chem 115:789 (50°C)"}
+  pH:               {value: 5.5,   unit: "-",            source: literature, ref: "Liang 2009 (pH 5.5)"}   # 1차: pH는 입력값
   time:             {value: 2.0,   unit: h,              source: assumed}
-  dose:             {value: 1000,  unit: U/kg bran,      source: assumed}
-  specific_activity: {value: 5000, unit: U/g enzyme,     source: assumed}
-  k_ref:            {value: 0.8,   unit: 1/h,            source: assumed}
+  dose:             {value: 2500,  unit: U/kg bran,      source: literature, ref: "Liang 2009 500 U/L, 1:5 → ~2.5 U/g"}
+  specific_activity: {value: 5000, unit: U/g enzyme,     source: literature, ref: "EU Reg. 1142/2007 ≥5000 FTU/g"}
+  k_ref:            {value: 2.0,   unit: 1/h,            source: assumed, ref: "Liang 2009 역산 (용해 포함이라 과대 가능)"}
   dose_ref:         {value: 1000,  unit: U/kg bran,      source: assumed}
-  T_opt:            {value: 50,    unit: degC,           source: assumed}
+  activity_ratio:   {value: 2.0,   unit: 최적조건/분석조건(37°C) 활성비, source: assumed}
+  T_opt:            {value: 55,    unit: degC,           source: literature, ref: "Liang 2009 DSM 55°C; Ullah & Gibson 1987 58°C"}
   T_sigma:          {value: 12,    unit: degC,           source: assumed}
-  pH_opt:           {value: 5.0,   unit: "-",            source: assumed}
-  pH_sigma:         {value: 1.0,   unit: "-",            source: assumed}
+  T_inact:          {value: 55,    unit: degC,           source: literature, ref: "Wyss 1998 AEM 64:4446 (55°C 초과 실활)"}
+  kd_slope:         {value: 0.5,   unit: 1/h/degC,       source: assumed}
+  pH_opt:           {value: 5.5,   unit: "-",            source: literature, ref: "Simons 1990 Br J Nutr 64:525 (pH 5.5)"}
+  pH_sigma:         {value: 1.7,   unit: "-",            source: literature, ref: "Brejnholt 2011 JSFA 91:1398 Fig.2 판독 (Peniophora 대리값)"}
 
 separation1:   # 추출 슬러리 원심분리
   cake_moisture:    {value: 0.60,  unit: wt,             source: assumed}
   solids_recovery:  {value: 0.98,  unit: to cake,        source: assumed}
   phytate_to_cake:  {value: 0.50,  unit: 미분해 피트산 중 고상 잔류, source: assumed}
 
-precipitation:   # 2 H3PO4 + 3 Ca(OH)2 -> Ca3(PO4)2 + 6 H2O
-  lime_excess:      {value: 1.05,  unit: x stoich,       source: assumed}
-  conversion:       {value: 0.95,  unit: of H3PO4,       source: assumed}   # 추후 PHREEQC 용해도로 대체
+precipitation:   # 2 H3PO4 + 3 Ca(OH)2 -> Ca3(PO4)2 + 6 H2O (pH 8.5~10)
+  Ca_P_ratio:       {value: 2.0,   unit: mol Ca/mol P,   source: literature, ref: "Hosni 2008 Desalination 223:337 (Ca/P 2.07, 98%); Warmadewanthi 2017 CET 56 (2:1, 99%)"}
+  conversion:       {value: 0.98,  unit: of H3PO4,       source: literature, ref: "Hosni 2008; Warmadewanthi 2017"}
   T:                {value: 50,    unit: degC,           source: assumed}   # 추출액 온도 유지(냉각 불필요)
-  time:             {value: 1.0,   unit: h,              source: assumed}
-  cake_moisture:    {value: 0.50,  unit: wt,             source: assumed}
+  time:             {value: 1.0,   unit: h,              source: literature, ref: "Hosni 2008 (30 min), Warmadewanthi 2017 (60 min)"}
+  cake_moisture:    {value: 0.50,  unit: wt,             source: assumed}   # 문헌 미확보
 
-acidulation:   # Ca3(PO4)2 + 3 H2SO4 -> 2 H3PO4 + 3 CaSO4
-  acid_excess:      {value: 1.02,  unit: x stoich,       source: assumed}
-  acid_strength:    {value: 0.98,  unit: wt H2SO4,       source: assumed}
-  conversion:       {value: 0.97,  unit: of Ca3(PO4)2,   source: assumed}
-  T:                {value: 75,    unit: degC,           source: assumed}
+acidulation:   # Ca3(PO4)2 + 3 H2SO4 -> 2 H3PO4 + 3 CaSO4 (이수화물법)
+  acid_excess:      {value: 1.02,  unit: x stoich,       source: literature, ref: "US Pat. 5,262,963 (~2% 과잉 황산염)"}
+  acid_strength:    {value: 0.93,  unit: wt H2SO4,       source: literature, ref: "EPA AP-42 §8.9"}
+  conversion:       {value: 0.95,  unit: of Ca3(PO4)2,   source: literature, ref: "EFMA BAT Booklet 4 (94-96%)"}
+  T:                {value: 75,    unit: degC,           source: literature, ref: "EFMA BAT Booklet 4 (70-80°C)"}
   time:             {value: 2.0,   unit: h,              source: assumed}
-  cake_moisture:    {value: 0.30,  unit: wt,             source: assumed}
+  cake_moisture:    {value: 0.30,  unit: wt,             source: literature, ref: "US Pat. 5,395,603 (25-33%)"}
+  wash_efficiency:  {value: 0.99,  unit: 케이크 함액 중 회수분율, source: literature, ref: "EFMA BAT Booklet 4 (≥2단 세척, ≥99%)"}
+  wash_water:       {value: 1.5,   unit: kg/kg 케이크 함액, source: assumed}
 
-concentration:
-  target_wt:        {value: 0.75,  unit: wt H3PO4,       source: assumed}
+concentration:   # 단효용 진공 강제순환 증발기
+  target_wt:        {value: 0.75,  unit: wt H3PO4,       source: literature, ref: "AP-42: 상품급 52-54% P2O5"}
+  pressure:         {value: 50000, unit: Pa,             source: assumed}   # 끓는점오름 미반영 → 실제 운전온도(80-90°C)에 맞춤

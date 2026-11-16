@@ -32,10 +32,25 @@ def test_target_concentration():
 
 
 def test_condition_trends():
-    X = lambda **kw: P.run({f"enzyme.{k}": v for k, v in kw.items()})[0]["phytate_conversion"]
-    assert X(time=1) < X(time=2) < X(time=4)          # 시간 ↑ → 전환율 ↑
-    assert X(pH=5.0) > X(pH=3.5) and X(pH=5.0) > X(pH=6.5)  # 최적 pH
-    assert X(dose=2000) > X(dose=1000)
+    # dose 500: 효소용량이 제한하는 영역에서 경향 확인 (기준 2500은 거의 100% 포화)
+    X = lambda **kw: P.run({"enzyme.dose": 500, **{f"enzyme.{k}": v for k, v in kw.items()}})[0]["phytate_conversion"]
+    assert X(time=1) < X(time=2) < X(time=4)                # 시간 ↑ → 전환율 ↑
+    assert X(pH=5.5) > X(pH=3.5) and X(pH=5.5) > X(pH=7.5)  # 최적 pH
+    assert X(dose=1000) > X()                               # 투입량 ↑
+    assert X(T=70) < X(T=55)                                # 55°C 초과 열실활
+
+
+def test_phytase_endpoint():
+    r, *_ = P.run({"enzyme.dose": 1e6})                     # 효소 과잉이어도
+    assert r["phytate_conversion"] <= 1
+    assert abs(r["phytate_P_released"] - 5 / 6) < 1e-3     # IP1에서 멈춤 → 최대 5/6
+
+
+def test_wash_reduces_loss():
+    washed, *_ = P.run()
+    unwashed, *_ = P.run({"acidulation.wash_efficiency": 0.0})
+    assert washed["P_loss_gypsum_cake_kg_h"] < unwashed["P_loss_gypsum_cake_kg_h"]
+    assert washed["P_recovery"] > unwashed["P_recovery"]
 
 
 def test_scenario_marked():
