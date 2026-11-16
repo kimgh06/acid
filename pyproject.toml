@@ -1,0 +1,12 @@
+[project]
+name = "acid"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "biosteam>=2.54.0",
+    "pandas>=3.1.1",
+    "phreeqc>=1.1.1",
+    "pyyaml>=6.0.3",
+]

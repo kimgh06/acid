@@ -1,0 +1,51 @@
+# 1차 공정 기준 조건. 모든 값은 {value, unit, source}.
+# source: assumed(가정·문헌 대표값, 미검증) / measured(실측). 실측 확보 시 value와 source를 바꾼다.
+
+feed:   # 미강(쌀겨)
+  bran_flow:        {value: 1000,  unit: kg/h,           source: assumed}
+  moisture:         {value: 0.11,  unit: wt (wet),       source: assumed}
+  total_P:          {value: 0.020, unit: wt (dry),       source: assumed}   # 미강 1.5~2.5 %
+  organic_P_frac:   {value: 0.85,  unit: of total P,     source: assumed}   # 피트산 P 비율
+  protein:          {value: 0.14,  unit: wt (dry),       source: assumed}
+  lipid:            {value: 0.18,  unit: wt (dry),       source: assumed}   # 탈지미강이면 ~0.02
+  carbohydrate:     {value: 0.45,  unit: wt (dry),       source: assumed}
+  # Ash(인 외 무기질) = 나머지
+
+pretreatment:
+  water_ratio:      {value: 8,     unit: kg water/kg bran, source: assumed}
+
+enzyme:   # 피타아제 가수분해. X = 1 - exp(-k t), k = k_ref·(dose/dose_ref)·f_T·f_pH
+  T:                {value: 50,    unit: degC,           source: assumed}
+  pH:               {value: 5.0,   unit: "-",            source: assumed}   # 1차: pH는 입력값(산·염기 투입 미계산)
+  time:             {value: 2.0,   unit: h,              source: assumed}
+  dose:             {value: 1000,  unit: U/kg bran,      source: assumed}
+  specific_activity: {value: 5000, unit: U/g enzyme,     source: assumed}
+  k_ref:            {value: 0.8,   unit: 1/h,            source: assumed}
+  dose_ref:         {value: 1000,  unit: U/kg bran,      source: assumed}
+  T_opt:            {value: 50,    unit: degC,           source: assumed}
+  T_sigma:          {value: 12,    unit: degC,           source: assumed}
+  pH_opt:           {value: 5.0,   unit: "-",            source: assumed}
+  pH_sigma:         {value: 1.0,   unit: "-",            source: assumed}
+
+separation1:   # 추출 슬러리 원심분리
+  cake_moisture:    {value: 0.60,  unit: wt,             source: assumed}
+  solids_recovery:  {value: 0.98,  unit: to cake,        source: assumed}
+  phytate_to_cake:  {value: 0.50,  unit: 미분해 피트산 중 고상 잔류, source: assumed}
+
+precipitation:   # 2 H3PO4 + 3 Ca(OH)2 -> Ca3(PO4)2 + 6 H2O
+  lime_excess:      {value: 1.05,  unit: x stoich,       source: assumed}
+  conversion:       {value: 0.95,  unit: of H3PO4,       source: assumed}   # 추후 PHREEQC 용해도로 대체
+  T:                {value: 50,    unit: degC,           source: assumed}   # 추출액 온도 유지(냉각 불필요)
+  time:             {value: 1.0,   unit: h,              source: assumed}
+  cake_moisture:    {value: 0.50,  unit: wt,             source: assumed}
+
+acidulation:   # Ca3(PO4)2 + 3 H2SO4 -> 2 H3PO4 + 3 CaSO4
+  acid_excess:      {value: 1.02,  unit: x stoich,       source: assumed}
+  acid_strength:    {value: 0.98,  unit: wt H2SO4,       source: assumed}
+  conversion:       {value: 0.97,  unit: of Ca3(PO4)2,   source: assumed}
+  T:                {value: 75,    unit: degC,           source: assumed}
+  time:             {value: 2.0,   unit: h,              source: assumed}
+  cake_moisture:    {value: 0.30,  unit: wt,             source: assumed}
+
+concentration:
+  target_wt:        {value: 0.75,  unit: wt H3PO4,       source: assumed}
