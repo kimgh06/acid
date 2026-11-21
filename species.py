@@ -33,6 +33,7 @@ chemicals = tmo.Chemicals([
     _chem("PhyticAcid", phase="l"),           # 피트산(피틴 대체), C6H18O24P6
     # 피타아제는 IP1(이노시톨 일인산)에서 멈춘다 (Wyss 1999) → 6개 중 5개 인산만 방출
     _surrogate("IP1", "myo-inositol", "l", formula="C6H13O9P"),
+    _chem("Inositol", "myo-inositol", phase="l"),  # 산성 포스파타아제로 IP1 까지 분해 시 (SR-013)
     _chem("H3PO4", phase="l"),
     _chem("H2SO4", phase="l"),
     _chem("CaOH2", "Ca(OH)2", phase="s"),
@@ -44,13 +45,16 @@ chemicals = tmo.Chemicals([
     _surrogate("Carbohydrate", "Cellulose", "s"),
     _surrogate("Ash", "SiO2", "s"),           # 인 외 무기질
     _surrogate("Phytase", "Glucose", "l"),  # 효소 단백질(수용성)
+    # 용존 금속 추적용 (원소 질량만 의미, 물성은 Glucose 대용 — 유량이 작아 열수지 영향 < 0.3 %)
+    _surrogate("K_ion", "Glucose", "l", formula="K"),
+    _surrogate("Mg_ion", "Glucose", "l", formula="Mg"),
 ])
 
 # DB의 피트산 Hf(+9004 kJ/mol)는 기여법 오류값. 가수분해 반응열 = 0 이 되도록 맞춘다 (가정값).
 _h = {c.ID: c.Hf for c in chemicals}
 chemicals.PhyticAcid.Hf = tmo.Chemical("myo-inositol").Hf + 6 * _h["H3PO4"] - 6 * _h["Water"]
 chemicals.IP1.Hf = chemicals.PhyticAcid.Hf + 5 * _h["Water"] - 5 * _h["H3PO4"]
-for ID in ("Protein", "Lipid", "Carbohydrate", "Ash", "Phytase"):
+for ID in ("Protein", "Lipid", "Carbohydrate", "Ash", "Phytase", "K_ion", "Mg_ion"):
     chemicals[ID].Hf = 0  # 비반응 대체물질
 
 chemicals.compile()

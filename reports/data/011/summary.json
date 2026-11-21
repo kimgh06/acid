@@ -1,0 +1,39 @@
+{
+  "base": {
+    "phytate_conversion": 0.9997765309055516,
+    "phytate_P_released": 0.8331471090879597,
+    "enzyme_limited_by": "kinetics",
+    "P_extraction": 0.8479846331889153,
+    "P_recovery": 0.6703786264161792,
+    "H3PO4_P_recovery": 0.6687442403374843,
+    "H3PO4_kg_h": 34.27566078030304,
+    "product_kg_h": 45.70088104040403,
+    "H3PO4_wt": 0.7500000000000004,
+    "purity_dry": 0.8860332396542371,
+    "P_loss_residue_cake_kg_h": 2.4626489423395723,
+    "P_loss_filtrate_kg_h": 2.2656604207141195,
+    "P_loss_gypsum_cake_kg_h": 0.6115568890042022,
+    "P_loss_condensate_kg_h": 0.0,
+    "acidulation_P_recovery": 0.9466899074984996,
+    "water_kg_h": 8081.9141829240925,
+    "lime_kg_h": 55.85876099874577,
+    "H2SO4_kg_h": 75.42058433989799,
+    "phytase_kg_h": 0.5,
+    "heating_MJ_h": 776.2251981426742,
+    "cooling_MJ_h": 409.4930535921715,
+    "electricity_kW": 5.71897021593484,
+    "E1_steam_t_per_t_P2O5": 5.679826367201494,
+    "E1_steam_t_per_t_water": 1.1736928070334962,
+    "E1_feed_P2O5_wt": 0.14969424589112662,
+    "mass_balance_error": -8.51285348707343e-12,
+    "energy_residual_max_kJ_h": 1.4901161193847656e-08,
+    "gypsum_kg_h": 98.86502317291125,
+    "IP1_kg_h": 20.404001500463025
+  },
+  "parameter_count": {
+    "literature": 24,
+    "assumed": 19,
+    "measured": 0
+  },
+  "precipitation_note": "추출액 P 54.9 mM, Ca 109.8 mM, 50 °C. 모델 가정 전환율 0.98, 문헌 98.8-99% (pH 8.5, Ca/P 2; Warmadewanthi 2017)"
+}

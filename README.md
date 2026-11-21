@@ -4,9 +4,9 @@
 요구사항은 [todo.md](todo.md).
 
 ```
-미강 + 물 + 피타아제
+미강 + 물(HX1 에서 여액 폐열로 예열) + 피타아제
   → R1 효소 추출 → S1 고액분리 ─→ 추출 잔사(폐기)
-  → R2 석회 침전 → S2 여과 ────→ 여액(폐기)
+  → R2 석회 침전 → S2 여과 ────→ 여액 → HX1 → 폐기
   → R3 황산 전환 → S3 석고 여과 → W1 석고 세척 ─→ 석고 케이크(폐기)
   → M1 (여과산 + 세척액) → E1 단효용 진공 농축 → 제품 인산 + 응축수
 ```
@@ -27,7 +27,11 @@ uv sync                      # Python 3.12 + 의존성(biosteam, phreeqc, pandas
 
 ```bash
 uv run main.py           # 기준 공정 + 조건별 비교 결과 출력, flowsheet.png 저장
+uv run main.py --out reports/data/NNN   # 모든 표를 CSV·JSON 으로 저장 (보고서 부록)
 uv run test_balance.py   # 수지·조건 변화 검증 (모두 "ok" 가 떠야 정상)
+uv run sensitivity.py    # 가정값 ±20% 민감도 → 실측 우선순위
+uv run uncertainty.py    # range 항목 몬테카를로 → 결과 P5/P50/P95, 영향 인자
+uv run equilibrium.py    # PHREEQC 물성 상수·침전 평형
 ```
 
 `main.py` 출력 순서:
@@ -56,6 +60,9 @@ enzyme:
 | `feed` | 미강 투입량, 수분, 총인, 유기인 비율, 단백질·지질·탄수화물 (회분 = 나머지) |
 | `pretreatment` | 물/미강 비 |
 | `enzyme` | 온도, pH, 반응시간, 효소 투입량, 동역학 상수(k_ref, 최적 T·pH, 실활 등) |
+| `phosphatase` | 2차 효소(IP1 분해) 사용 여부·전환율 (기준 미사용) |
+| `filtrate_recycle` | 여액 재순환 분율 (기준 0) |
+| `heat_recovery` | 여액 → 공정수 예열 사용 여부, 최소 접근온도차 |
 | `separation1` | 잔사 케이크 함액률, 고형분 회수율, 미분해 피트산의 고상 잔류율 |
 | `precipitation` | Ca/P 몰비, 침전 전환율, 온도, 시간, 케이크 함액률 |
 | `acidulation` | 황산 과잉률·농도, 전환율, 온도, 시간, 케이크 함액률, 세척 회수율·세척수 |
@@ -104,15 +111,22 @@ sys.diagram(format="png")     # 공정도
 
 `run()` 에 넘긴 값은 `source: scenario` 로 표시되어 가정값 목록에서 제외된다.
 
+### 3.5 원료 바꾸기
+
+`params.yaml` `feedstocks` 에 프리셋을 두고 `P.run(feedstock="defatted_rice_bran")` 으로 실행한다. 프리셋 값이 `feed` 를 덮어쓴다.
+새 원료는 같은 6개 항목(수분, 총인, 유기인 비율, 단백질, 지질, 탄수화물)을 `source`·`ref` 와 함께 추가한다.
+
 ## 4. 결과 지표
 
 | 키 | 의미 |
 |---|---|
 | `phytate_conversion` | 피트산 → IP1 전환율 |
-| `phytate_P_released` | 피트산 P 중 무기인으로 방출된 비율 (최대 5/6) |
+| `phytate_P_released` | 피트산 P 중 무기인으로 방출된 비율 (피타아제만: 최대 5/6, 산성 포스파타아제 사용 시 그 이상) |
 | `enzyme_limited_by` | 효소 전환율 제한 요인: `kinetics` / `capacity` |
-| `P_extraction` | 원료 총인 중 추출액(S1 액상)으로 나온 비율 |
-| `P_recovery` | **원료 총인 대비 제품 인 회수율** |
+| `P_extraction` | 순 추출률: 원료 총인 중 추출 잔사로 빠지지 않은 비율 (재순환 P 는 제외) |
+| `P_recovery` | **원료 총인 대비 제품 인 회수율** (제품 중 모든 형태의 P) |
+| `product_K_wt`, `product_Mg_wt`, `Mg_to_TCP_cake` | 제품 K·Mg 농도, 석회 침전 시 Mg 공침 분율 |
+| `H3PO4_P_recovery` | 원료 총인 대비 H₃PO₄ 형태로 회수된 P (제품 중 IP1 등 유기 P 제외) |
 | `H3PO4_kg_h`, `product_kg_h`, `H3PO4_wt` | 제품 인산량, 제품 총량, 농도 |
 | `purity_dry` | 무수 기준 순도 (H₃PO₄ / 물 제외 질량) |
 | `P_loss_<스트림>_kg_h` | 공정별 인 손실 (잔사, 여액, 석고, 응축수) |
@@ -120,7 +134,7 @@ sys.diagram(format="png")     # 공정도
 | `water_kg_h`, `lime_kg_h`, `H2SO4_kg_h`, `phytase_kg_h` | 물·약품 사용량 |
 | `heating_MJ_h`, `cooling_MJ_h`, `electricity_kW` | 에너지 소비량 |
 | `E1_steam_t_per_t_P2O5`, `E1_steam_t_per_t_water`, `E1_feed_P2O5_wt` | 농축 스팀 원단위, 증발기 입구 농도 |
-| `gypsum_kg_h`, `IP1_kg_h` | 부산물 |
+| `gypsum_kg_h`, `IP1_kg_h`, `inositol_kg_h` | 부산물 |
 | `mass_balance_error` | 전체 질량수지 상대오차 (≈ 0 이어야 함) |
 
 `P_recovery × 원료 P + Σ P_loss = 원료 P` 가 항상 성립한다 (테스트로 검증).
@@ -142,27 +156,33 @@ sys.diagram(format="png")     # 공정도
 | `species.py` | 물질 정의. 단백질·지질·탄수화물·회분·효소·IP1은 대체물질 |
 | `process.py` | 단위공정(Tank, Separator, Washer), 시스템 구성, 수지 검사, 결과·표 함수 |
 | `main.py` | 기준 결과·시나리오 비교·문헌 비교 출력, 공정도 저장 |
+| `sensitivity.py` | 가정값 ±20% 민감도 분석 |
+| `uncertainty.py` | 몬테카를로 불확도 분석 (`range` 항목) |
+| `equilibrium.py` | PHREEQC 침전 평형·물성 상수 검증 (VAL-03) |
+| `reports/` | 단계별 보고서 (작성 규칙: `AGENTS.md`) |
+| `AGENTS.md` | 에이전트 작업 규칙 (`CLAUDE.md` 가 import) |
 | `test_balance.py` | 질량·인 원소수지, 목표 농도, 조건 변화 방향, 효소 종점, 세척 효과 검증 |
 
-## 7. 문헌 비교 결과 (기준 조건)
+## 7. 결과·검증 현황
 
-| 지표 | 모델 | 문헌 | 판정 · 해석 |
-|---|---|---|---|
-| 산 전환·세척 P 회수율 | 0.947 | 0.94–0.96 (EFMA) | 범위 내 |
-| 증발 스팀 (t/t 물) | 1.14 | 1.05–1.33 (단효용) | 범위 내 |
-| 피트산 분해 (Liang 2009 조건) | 0.32 | 0.92 | 벗어남. 문헌값은 용해 포함 "제거율"이고, 2.5 U/g·30분의 효소용량 상한은 ~30% |
-| 증발기 입구 농도 (P₂O₅) | 0.15 | 0.26–0.32 | 벗어남. Ca-인산 케이크 함액(50%, 가정값)이 물을 끌고 들어와 산이 묽음 |
-| 농축 스팀 (t/t P₂O₅) | 5.5 | 0.5–2.2 | 벗어남. 위 희석 때문 (물 1 t 당 스팀은 정상) |
+최신 결과와 해석은 단계 보고서에 있다 → [reports/README.md](reports/README.md) (단계별 P 회수율 추이), 최신 데이터는 `reports/data/<최신 번호>/`.
+이 README 에는 수치를 적지 않는다 (단계마다 바뀌어 낡는다).
 
-다음 개선 대상: Ca-인산 케이크 함액률 실측 또는 건조/세척 단계 추가, 효소 동역학 실험값.
+- 문헌 비교 판정: 모델값이 문헌 범위의 ±5 % 안이면 "범위 내" (`main.py` `LITERATURE`)
+- 불확도: `uv run uncertainty.py` — 기준값과 함께 P5–P95 구간을 보고한다 (SR-008: 기준값이 분포 상단)
+- 실측 우선순위: SR-003(1인자 민감도), SR-008(동시 변동) 9절 권고
 
-## 8. 1차 한계
+## 8. 한계
 
 - 효소: 가우시안 T·pH 보정 + 용량 상한 + 선형 실활. `k_ref`, `activity_ratio`, `kd_slope`, `T_sigma` 는 가정값
-- pH는 입력값. 산·염기 소비, 이온 평형, 침전 용해도는 미계산 (PHREEQC 연동 예정, `phreeqc` 설치됨)
+- pH는 입력값. 산·염기 소비는 미계산. 이온 평형은 R2 Mg 공침에만 PHREEQC 연동 (SR-012), P 침전 전환율은 문헌값
+- 금속: K·Mg 만 추적 (Ca·Fe 등 미반영). 공침 Mg 의 추가 황산 소요 미반영
 - 침전물은 Ca₃(PO₄)₂ 로 가정. 문헌상 pH 8.5–10 에서는 하이드록시아파타이트(Ca/P 1.67)가 생성될 수 있음
 - 미분해 피트산·IP1은 침전 공정에서 빠지지 않고 여액으로 손실 처리
 - 석고 세척은 회수율 하나로 요약, 세척액은 반응기 재순환 대신 농축기로 보냄
 - 증발기: 끓는점오름 미반영 (압력으로 운전온도만 맞춤)
 - 반응열: 피타아제 가수분해 = 0 가정 (DB의 피트산 생성열 오류로 보정), 황산 희석열 미포함
+- 열회수: 여액 → 공정수 1기만. 전열계수는 BioSTEAM 기본값(0.5 kW/m²·K), 파울링 미반영
+- 불확도: 매개변수 독립·균등분포 가정, 운전 조건은 표본 대상 아님
+- 원료: 전지미강·탈지미강만 (밀기울·포도박은 문헌 조사 필요), 모든 원료에 같은 효소 동역학
 - 분리기 전력, 장치 비용 미포함

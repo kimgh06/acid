@@ -1,0 +1,44 @@
+﻿parameter,value,unit,source,ref,range
+feed.bran_flow,1000.0,kg/h,assumed,,
+feed.moisture,0.1,wt (wet),literature,Feedipedia node/750 (DM 87-93%),"[0.07, 0.13]"
+feed.total_P,0.018,wt (dry),literature,USDA FDC 169713 1.79%; Feedipedia 1.70±0.31%,"[0.0139, 0.0201]"
+feed.organic_P_frac,0.9,of total P,literature,Casas & Stein 2015 J Anim Sci 93:3441 (0.905),"[0.85, 0.92]"
+feed.protein,0.14,wt (dry),literature,USDA 14.2%; Feedipedia 14.8±1.5%,"[0.115, 0.183]"
+feed.lipid,0.18,wt (dry),literature,Feedipedia 17.2±2.6%; USDA 22.2%. 탈지미강 1-4%,"[0.113, 0.222]"
+feed.carbohydrate,0.5,wt (dry),literature,USDA 52.9% (차감법); Feedipedia 전분 28.8 + NDF 25.2,"[0.45, 0.55]"
+pretreatment.water_ratio,8.0,kg water/kg bran,assumed,,
+enzyme.T,50.0,degC,literature,Liang 2009 Food Chem 115:789 (50°C),
+enzyme.pH,5.5,-,literature,Liang 2009 (pH 5.5),
+enzyme.time,2.0,h,assumed,,
+enzyme.dose,2500.0,U/kg bran,literature,"Liang 2009 500 U/L, 1:5 → ~2.5 U/g",
+enzyme.specific_activity,5000.0,U/g enzyme,literature,EU Reg. 1142/2007 ≥5000 FTU/g,
+enzyme.k_ref,2.0,1/h,assumed,Liang 2009 역산 (용해 포함이라 과대 가능),"[1.0, 3.0]"
+enzyme.dose_ref,1000.0,U/kg bran,assumed,,
+enzyme.activity_ratio,2.0,최적조건/분석조건(37°C) 활성비,assumed,,"[1.0, 3.0]"
+enzyme.T_opt,55.0,degC,literature,Liang 2009 DSM 55°C; Ullah & Gibson 1987 58°C,"[55, 58]"
+enzyme.T_sigma,12.0,degC,assumed,,"[8, 16]"
+enzyme.T_inact,55.0,degC,literature,Wyss 1998 AEM 64:4446 (55°C 초과 실활),
+enzyme.kd_slope,0.5,1/h/degC,assumed,,"[0.2, 1.0]"
+enzyme.pH_opt,5.5,-,literature,Simons 1990 Br J Nutr 64:525 (pH 5.5),"[5.0, 5.5]"
+enzyme.pH_sigma,1.7,-,literature,Brejnholt 2011 JSFA 91:1398 Fig.2 판독 (Peniophora 대리값),"[1.2, 2.0]"
+separation1.cake_moisture,0.6,wt,assumed,,"[0.5, 0.7]"
+separation1.solids_recovery,0.98,to cake,assumed,,"[0.95, 0.99]"
+separation1.phytate_to_cake,0.5,미분해 피트산 중 고상 잔류,assumed,,"[0.3, 0.7]"
+precipitation.Ca_P_ratio,2.0,mol Ca/mol P,literature,"Hosni 2008 Desalination 223:337 (Ca/P 2.07, 98%); Warmadewanthi 2017 CET 56 (2:1, 99%)",
+precipitation.conversion,0.98,of H3PO4,literature,Hosni 2008; Warmadewanthi 2017,"[0.95, 0.99]"
+precipitation.T,50.0,degC,assumed,,
+precipitation.time,1.0,h,literature,"Hosni 2008 (30 min), Warmadewanthi 2017 (60 min)",
+precipitation.cake_moisture,0.5,wt,assumed,,"[0.4, 0.7]"
+acidulation.acid_excess,1.02,x stoich,literature,"US Pat. 5,262,963 (~2% 과잉 황산염)",
+acidulation.acid_strength,0.93,wt H2SO4,literature,EPA AP-42 §8.9,
+acidulation.conversion,0.95,of Ca3(PO4)2,literature,EFMA BAT Booklet 4 (94-96%),"[0.94, 0.96]"
+acidulation.T,75.0,degC,literature,EFMA BAT Booklet 4 (70-80°C),
+acidulation.time,2.0,h,assumed,,
+acidulation.cake_moisture,0.3,wt,literature,"US Pat. 5,395,603 (25-33%)","[0.25, 0.33]"
+acidulation.wash_efficiency,0.99,케이크 함액 중 회수분율,literature,"EFMA BAT Booklet 4 (≥2단 세척, ≥99%)","[0.98, 0.995]"
+acidulation.wash_water,1.5,kg/kg 케이크 함액,assumed,,
+heat_recovery.enabled,1.0,"1=사용, 0=미사용",assumed,,
+heat_recovery.dT_min,10.0,K (최소 접근온도차),assumed,,
+filtrate_recycle.fraction,0.0,여액 중 재순환 분율,assumed,,
+concentration.target_wt,0.75,wt H3PO4,literature,AP-42: 상품급 52-54% P2O5,
+concentration.pressure,50000.0,Pa,assumed,,

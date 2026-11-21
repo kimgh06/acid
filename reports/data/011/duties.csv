@@ -1,0 +1,11 @@
+﻿unit,heating_MJ_h,cooling_MJ_h,power_kW
+R1_extraction,473.4866597805839,0.0,0.0
+S1_solid_liquid,0.0,0.0,0.0
+R2_precipitation,0.0,55.05414864607155,0.0
+S2_TCP_filter,0.0,0.0,0.0
+HX1_water_preheat,0.0,0.0,0.0
+R3_acidulation,0.0,78.1697221519621,0.0
+S3_gypsum_filter,0.0,0.0,0.0
+W1_gypsum_wash,0.0,0.0,0.0
+M1_acid_mix,0.0,0.0,0.0
+E1_concentration,302.73853836209037,276.26918279413786,5.71897021593484
